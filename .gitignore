@@ -24,7 +24,7 @@ __pycache__/
 # Aider files (existing)
 .aider*
 
-data
+**.sqlite
 
 # Environment variables (existing)
 .env
