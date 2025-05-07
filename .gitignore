@@ -1,0 +1,30 @@
+# Byte-code files
+*.pyc
+__pycache__/
+
+# Distribution / build files
+/dist/
+/*.egg-info/
+
+# Virtual environment
+/venv/
+.venv/
+
+# Editor/IDE specific files (already partially covered by .idea/* read-only)
+.vscode/
+
+# Test cache
+.pytest_cache/
+
+# LangChain specific caches/files (adjust if needed based on usage)
+.langchain/
+
+# aiogram specific files (less common standard ignores, add if specific patterns emerge)
+
+# Aider files (existing)
+.aider*
+
+data
+
+# Environment variables (existing)
+.env
