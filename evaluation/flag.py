@@ -47,8 +47,12 @@ class FlagResponse(BaseModel):
 
 
 class JudgmentResponse(BaseModel):
-    severity_assessment: Literal["DISMISS", "CAUTION", "WARNING", "RESTRICT", "REMOVE", "BAN"] = Field(
-        description="The determined severity level and appropriate action to take"
+    user_account_action: Literal["DISMISS", "RESTRICT", "REMOVE", "BAN"] = Field(
+        description="The determined action to take on the user's account"
+    )
+
+    user_message_action: Literal["DISMISS", "DELETE"] = Field(
+        description="The determined action to take on the user's message"
     )
 
     reasoning: str = Field(
@@ -60,7 +64,8 @@ class JudgmentResponse(BaseModel):
         description=(
             "Suggested message to send to the user explaining the action (if applicable).  max length 40 characters\n"
             "MUST BE IN THE SAME LANGUAGE AS THE INPUT MESSAGE\n"
-            "give them also feedback how they can stay in the groups rules"
+            "give them also feedback how they can stay in the groups rules\n"
+            "You Must always give them a feedback how they can stay in the groups rules\n"
         ),
     )
 

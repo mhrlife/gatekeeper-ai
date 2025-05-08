@@ -8,7 +8,6 @@ from typing_extensions import List, Any, Dict
 
 from database.models import GroupInfo, UserGroupMessage
 from evaluation.flag import associate_flag
-from evaluation.tools import message_tool_calls, UserRequestResponse
 from telegram.dispatcher import dispatcher
 
 logger = get_logger()
@@ -41,23 +40,9 @@ async def handle_message(message: Message) -> None:
 
     # Await both tasks
     await asyncio.gather(
-        process_user_tool_calls(message),
         process_flag_message(message, group_info, user_message_history_qs),
         log_current_chat_in_history(message)
     )
-
-
-async def process_user_tool_calls(message: Message):
-    out: UserRequestResponse = await message_tool_calls.ainvoke(message.text)
-
-    logger.info("user tool calls",
-                message_text=message.text,
-                request=out.request,
-                response=out.response,
-                able_to_respond=out.able_to_respond)
-
-    if out and out.able_to_respond:
-        await message.reply(out.response)
 
 
 async def process_flag_message(message: Message, group: GroupInfo, messages_history: list[UserGroupMessage]):
@@ -80,15 +65,21 @@ async def process_flag_message(message: Message, group: GroupInfo, messages_hist
         current_time=current_time_utc
     )
 
-    if action and action.severity_assessment != "DISMISS":
-        await message.reply(f"""مدیر هوشمند:
+    if action and action.user_message_action != "DISMISS":
+        await message.delete()
+        await message.bot.send_message(
+            chat_id=message.chat.id,
+            text=f"""{message.from_user.first_name} - پیام سیستم:
 
-{action.message_to_user}""")
+{action.message_to_user}"""
+        )
 
     logger.info("flag handled",
                 message_text=message.text,
                 reason=flag.classification if flag else None,
-                action=action.severity_assessment if action else None, )
+                action=action.user_message_action if action else None,
+                action_message=action.message_to_user if action else None
+                )
 
 
 async def log_current_chat_in_history(message: Message):
