@@ -3,8 +3,8 @@ import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 
-MAIN_MODEL = "google/gemini-2.5-flash-preview"
-WEAK_MODEL = "google/gemini-2.0-flash-001"
+MAIN_MODEL = "google/gemini-2.0-flash-lite-001"
+WEAK_MODEL = "google/gemini-2.0-flash-lite-001"
 
 
 def create_chat_client(model_name: str, max_tokens=None) -> ChatOpenAI:
