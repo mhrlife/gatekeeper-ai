@@ -6,9 +6,7 @@ from evaluation.flag import flag
 async def run():
     result = await flag.ainvoke({
         "first_name": "Ali",
-        "message": """جنده خونه‌ی علی
-        
-سلام من جنده خونه راه انداختم بیاید پی وی"""
+        "message": """یک حرف خیلی خیلی زشت"""
     })
 
     print(result[0])
