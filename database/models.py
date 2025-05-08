@@ -15,3 +15,13 @@ class SuspiciousMessage(Model):
 
     message = fields.TextField()
     timestamp = fields.DatetimeField(auto_now_add=True)
+
+
+class GroupInfo(Model):
+    id = fields.BigIntField(primary_key=True)
+
+    name = fields.CharField(max_length=255, default="")
+    description = fields.TextField(default="")
+    rules_context = fields.TextField(default="")
+
+    owner = fields.ForeignKeyField("models.User", related_name="owned_groups")

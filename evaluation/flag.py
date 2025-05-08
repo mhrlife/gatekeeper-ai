@@ -14,10 +14,13 @@ from evaluation.prompt import FLAG_PROMPT, ACTION_PROMPT
 class FlagContext(LLMContext):
     first_name: str
     message: str
+    group_title: str
+    group_context: str
 
 
 class FlagResponse(BaseModel):
-    classification: Literal["CLEAN", "SPAM", "SEXUAL", "ADVERTISEMENT", "FLIRT", "INSULT", "POLITICS"] = Field(
+    classification: Literal[
+        "CLEAN", "SPAM", "SEXUAL", "ADVERTISEMENT", "FLIRT", "INSULT", "POLITICS", "IRRELEVANT_TO_GROUP"] = Field(
         description="The category this content falls into"
     )
 
@@ -50,21 +53,28 @@ class JudgmentResponse(BaseModel):
 
     message_to_user: Optional[str] = Field(
         default=None,
-        description="Suggested message to send to the user explaining the action (if applicable).  max length 20 characters",
+        description=(
+            "Suggested message to send to the user explaining the action (if applicable).  max length 40 characters\n"
+            "MUST BE IN THE SAME LANGUAGE AS THE INPUT MESSAGE\n"
+            "give them also feedback how they can stay in the groups rules"
+        ),
     )
 
 
-async def associate_flag(first_name: str, message: str) -> Tuple[FlagResponse, JudgmentResponse]:
+async def associate_flag(first_name: str, message: str, group_title: str, group_context: str) -> Tuple[
+    FlagResponse, Optional[JudgmentResponse]]:
     return await flag.ainvoke({
         "first_name": first_name,
         "message": message,
+        "group_title": group_title,
+        "group_context": group_context,
     })
 
 
 @entrypoint()
 async def flag(
         args: dict,
-) -> [FlagResponse, JudgmentResponse]:
+) -> Tuple[FlagResponse, Optional[JudgmentResponse]]:
     """
     This function is used to flag sensitive contents
     """
@@ -72,15 +82,17 @@ async def flag(
         llm=create_chat_client(MAIN_MODEL),
         message=args.get("message"),
         first_name=args.get("first_name"),
+        group_title=args.get("group_title"),
+        group_context=args.get("group_context"),
     )
 
     flag_response: FlagResponse = await initial_flag_content(ctx)
     if flag_response.classification == "CLEAN":
-        return [flag_response, None]
+        return flag_response, None
 
     judgement_response = await judgement(ctx, flag_response)
 
-    return [flag_response, judgement_response]
+    return flag_response, judgement_response
 
 
 @task
@@ -95,6 +107,8 @@ async def initial_flag_content(ctx: FlagContext) -> FlagResponse:
         FLAG_PROMPT.format(
             FIRST_NAME=ctx.first_name,
             INPUT=ctx.message,
+            GROUP_TITLE=ctx.group_title,
+            GROUP_CONTEXT=ctx.group_context,
         )
     )
 
@@ -113,7 +127,9 @@ async def judgement(ctx: FlagContext, flag_response: FlagResponse) -> JudgmentRe
         ACTION_PROMPT.format(
             FIRST_NAME=ctx.first_name,
             INPUT=ctx.message,
-            WARDEN_ANALYSIS=json.dumps(flag_response.dict(), indent=2, ensure_ascii=False),
+            WARDEN_ANALYSIS=json.dumps(flag_response.model_dump(), indent=2, ensure_ascii=False),
+            GROUP_TITLE=ctx.group_title,
+            GROUP_CONTEXT=ctx.group_context,
         )
     )
 
