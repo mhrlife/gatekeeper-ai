@@ -8,6 +8,7 @@ from typing_extensions import List, Any, Dict
 
 from database.models import GroupInfo, UserGroupMessage
 from evaluation.flag import associate_flag
+from evaluation.tools import message_tool_calls, UserRequestResponse
 from telegram.dispatcher import dispatcher
 
 logger = get_logger()
@@ -47,7 +48,16 @@ async def handle_message(message: Message) -> None:
 
 
 async def process_user_tool_calls(message: Message):
-    pass
+    out: UserRequestResponse = await message_tool_calls.ainvoke(message.text)
+
+    logger.info("user tool calls",
+                message_text=message.text,
+                request=out.request,
+                response=out.response,
+                able_to_respond=out.able_to_respond)
+
+    if out and out.able_to_respond:
+        await message.reply(out.response)
 
 
 async def process_flag_message(message: Message, group: GroupInfo, messages_history: list[UserGroupMessage]):
