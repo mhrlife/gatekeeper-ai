@@ -28,3 +28,7 @@ data
 
 # Environment variables (existing)
 .env
+
+# Dockerfile
+Dockerfile
+````
