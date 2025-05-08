@@ -4,7 +4,6 @@ from datetime import datetime, timezone, timedelta
 from aiogram import F
 from aiogram.types import Message
 from structlog import get_logger
-from tortoise.queryset import QuerySet
 from typing_extensions import List, Any, Dict
 
 from database.models import GroupInfo, UserGroupMessage
@@ -25,8 +24,6 @@ async def get_group_id(message: Message) -> None:
 
     await message.delete()
 
-    print("alo?")
-
 
 @dispatcher.message(is_group_chat)
 async def handle_message(message: Message) -> None:
@@ -35,15 +32,18 @@ async def handle_message(message: Message) -> None:
         "description": message.chat.description or "",
     })
 
-    user_message_history = UserGroupMessage.filter(
+    user_message_history_qs = await UserGroupMessage.filter(
         user=message.from_user.id,
         group=group_info,
         message_created_at__gte=datetime.now(timezone.utc) - timedelta(minutes=5)
     ).order_by("-db_created_at").limit(10)
 
     # Await both tasks
-    await asyncio.gather(process_user_tool_calls(message),
-                         process_flag_message(message, group_info, user_message_history), return_exceptions=True)
+    await asyncio.gather(
+        process_user_tool_calls(message),
+        process_flag_message(message, group_info, user_message_history_qs),
+        log_current_chat_in_history(message)
+    )
 
 
 async def process_user_tool_calls(message: Message):
@@ -73,7 +73,7 @@ async def process_flag_message(message: Message, group: GroupInfo, messages_hist
     if action and action.severity_assessment != "DISMISS":
         await message.reply(f"""مدیر هوشمند:
 
-    {action.message_to_user}""")
+{action.message_to_user}""")
 
     logger.info("flag handled",
                 message_text=message.text,
@@ -83,11 +83,13 @@ async def process_flag_message(message: Message, group: GroupInfo, messages_hist
 
 async def log_current_chat_in_history(message: Message):
     await UserGroupMessage.create(
-        user=message.from_user.id,
-        group=message.chat.id,
+        user_id=message.from_user.id,
+        group_id=message.chat.id,
         message_id=message.message_id,
         text=message.text or message.caption or "",
         message_created_at=message.date,
-        replied_to_message_id=message.reply_to_message.message_id,
-        replied_to_message_text=message.reply_to_message.text
+        replied_to_message_id=message.reply_to_message.message_id if message.reply_to_message else None,
+        replied_to_message_text=message.reply_to_message.text if message.reply_to_message else None,
     )
+
+    logger.info("message logged", text=message.text)
