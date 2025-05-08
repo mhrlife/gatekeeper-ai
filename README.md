@@ -1,6 +1,6 @@
-# KilljoyBot
+# Gatekeeper AI
 
-KilljoyBot is a Telegram bot designed for content moderation using a two-stage AI evaluation system. It leverages LangChain and OpenAI models (via OpenRouter) to flag potentially problematic messages and determine appropriate actions.
+Gatekeeper AI is a Telegram bot designed for content moderation using a two-stage AI evaluation system. Its username is `AI_Gatekeeper_Bot`. It leverages LangChain and OpenAI models (via OpenRouter) to flag potentially problematic messages and determine appropriate actions.
 
 ## Features
 
