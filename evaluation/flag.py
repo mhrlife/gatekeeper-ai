@@ -55,6 +55,10 @@ class JudgmentResponse(BaseModel):
         description="The determined action to take on the user's message"
     )
 
+    confidence: Literal["1", "2", "3", "4", "5"] = Field(
+        description="How confident the system is in message and account action, out of 5."
+    )
+
     reasoning: str = Field(
         description="Explanation of the decision-making process and justification for the severity assessment.  max length 20 characters",
     )

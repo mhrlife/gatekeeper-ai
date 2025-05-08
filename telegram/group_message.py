@@ -65,7 +65,21 @@ async def process_flag_message(message: Message, group: GroupInfo, messages_hist
         current_time=current_time_utc
     )
 
+    logger.info("flag handled",
+                message_text=message.text,
+                reason=flag.classification if flag else None,
+                action=action.user_message_action if action else None,
+                action_message=action.message_to_user if action else None,
+                confidence=action.confidence if action else None,
+                )
     if action and action.user_message_action != "DISMISS":
+
+        if flag.classification == "IRRELEVANT_TO_GROUP" and int(action.confidence) <= 3:
+            return
+
+        if int(action.confidence) <= 2:
+            return
+
         await message.delete()
         await message.bot.send_message(
             chat_id=message.chat.id,
@@ -73,13 +87,6 @@ async def process_flag_message(message: Message, group: GroupInfo, messages_hist
 
 {action.message_to_user}"""
         )
-
-    logger.info("flag handled",
-                message_text=message.text,
-                reason=flag.classification if flag else None,
-                action=action.user_message_action if action else None,
-                action_message=action.message_to_user if action else None
-                )
 
 
 async def log_current_chat_in_history(message: Message):
