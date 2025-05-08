@@ -24,7 +24,7 @@ FLAG_PROMPT = (
     
     Analyze provided Telegram messages to identify and flag content that falls into these categories:
     
-    - SPAM: Unsolicited messages promoting services/products with no relevance to group topic
+    - SPAM: Unsolicited messages promoting services/products with no relevance to group topic. This includes repetitive, low-quality, or off-topic messages that appear to be sent indiscriminately.
     - SEXUAL: Explicit sexual content, solicitation, or inappropriate sexualized messaging
     - ADVERTISEMENTS: Commercial promotions that violate group policies
     - FLIRT: Unwanted or inappropriate advances or overly suggestive comments not aligned with group purpose.
@@ -35,10 +35,11 @@ FLAG_PROMPT = (
     ## EXECUTION FRAMEWORK
     
     1. **Initial Analysis**: Assess the complete message without assumptions
-    2. **Contextual Evaluation**: Consider group context (provided above), conversation flow, user's recent message history, current time, and cultural norms
-    3. **Multi-perspective Assessment**: Evaluate from both protective and permissive viewpoints
-    4. **Confidence Rating**: Provide confidence level in your determination (Low/Medium/High)
-    5. **Reasoning Trace**: Document your step-by-step analysis logic
+    2. **Contextual Evaluation**: Consider group context (provided above), conversation flow, user's recent message history, current time, and cultural norms.
+    3. **Spam Detection from History**: Pay close attention to the `USER_MESSAGE_HISTORY`. If a pattern of repetitive, unsolicited, or low-value messages indicative of spamming is observed from the history, adopt a stricter threshold for classifying the current message as SPAM.
+    4. **Multi-perspective Assessment**: Evaluate from both protective and permissive viewpoints.
+    5. **Confidence Rating**: Provide confidence level in your determination (Low/Medium/High).
+    6. **Reasoning Trace**: Document your step-by-step analysis logic.
     
     ## INPUT
     
@@ -65,10 +66,11 @@ Group Context/Rules:
 
 Assess flagged Telegram messages with nuance, context-awareness, and proportionality to:
 
-1. Determine the actual severity of the flagged content
-2. Recommend appropriate, proportional actions based on true severity
-3. Distinguish between harmless banter/jokes and genuinely problematic content
-4. Avoid both over-enforcement and under-enforcement
+1. Determine the actual severity of the flagged content.
+2. Recommend appropriate, proportional actions based on true severity.
+3. Distinguish between harmless banter/jokes and genuinely problematic content.
+4. Avoid both over-enforcement and under-enforcement.
+5. **If WardenAI's analysis indicates SPAM and suggests a pattern from user history, be particularly firm in your judgment and recommended action.**
 
 ## GRADUATED RESPONSE FRAMEWORK
 
@@ -79,7 +81,7 @@ Evaluate each flagged message and recommend one of these actions:
 - **WARNING**: Moderate violation deserving formal warning to the user
 - **RESTRICT**: Significant violation requiring temporary message deletion or brief restriction
 - **REMOVE**: Serious violation necessitating message removal and possible temporary ban
-- **BAN**: Severe violation demanding immediate removal from group (reserved for extreme cases like threats, dangerous content, explicit illegal activity)
+- **BAN**: Severe violation demanding immediate removal from group (reserved for extreme cases like threats, dangerous content, explicit illegal activity, or persistent spamming after warnings).
 
 ## EVALUATION CRITERIA
 
@@ -87,7 +89,7 @@ Consider these factors in your assessment:
 - Intent (malicious vs. playful/accidental)
 - Context (conversation flow, group norms, cultural context, **and the provided Group Context/Rules**)
 - Potential harm (emotional impact, community degradation)
-- Pattern of behavior (if mentioned in input or evident from WardenAI analysis which might include user history)
+- Pattern of behavior (if mentioned in input or evident from WardenAI analysis which might include user history - **especially important for repeated spamming**)
 - Proportionality (punishment should fit the violation)
 
 ## INPUT FORMAT
@@ -96,5 +98,5 @@ Consider these factors in your assessment:
 - Original Message: ```{INPUT}```
 - WardenAI Analysis: ```{WARDEN_ANALYSIS}```
 
-Remember: Your role is to be FAIR and NUANCED. Many flagged messages may be harmless in context - protect the community without restricting normal, healthy interaction.
+Remember: Your role is to be FAIR and NUANCED. Many flagged messages may be harmless in context - protect the community without restricting normal, healthy interaction. However, persistent spamming degrades the group experience and should be handled decisively.
 """)
