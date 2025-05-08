@@ -32,22 +32,6 @@ async def handle_message(message: Message) -> None:
     if action:
         action_text = action.model_dump_json(indent=2)
 
-    replied = await bot.send_message(
-        chat_id=97587963,
-        text=message.text,
-    )
-
-    await replied.reply(f"""
-```json
-{reason.model_dump_json(indent=2)}
-```
-
-```json
-{action_text}
-```
-
-""", parse_mode="MarkdownV2")
-
     if reason.classification != 'CLEAN':
         await message.reply(f"""
            ```json
