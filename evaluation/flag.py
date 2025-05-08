@@ -1,5 +1,7 @@
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone  # Added timezone
+from typing import List, Dict, Any  # Added Any
 
 from langgraph.func import entrypoint, task
 from pydantic import BaseModel, Field
@@ -16,6 +18,8 @@ class FlagContext(LLMContext):
     message: str
     group_title: str
     group_context: str
+    user_message_history: List[Dict[str, Any]]
+    current_time: datetime
 
 
 class FlagResponse(BaseModel):
@@ -61,13 +65,16 @@ class JudgmentResponse(BaseModel):
     )
 
 
-async def associate_flag(first_name: str, message: str, group_title: str, group_context: str) -> Tuple[
+async def associate_flag(first_name: str, message: str, group_title: str, group_context: str,
+                         user_message_history: List[Dict[str, Any]], current_time: datetime) -> Tuple[
     FlagResponse, Optional[JudgmentResponse]]:
     return await flag.ainvoke({
         "first_name": first_name,
         "message": message,
         "group_title": group_title,
         "group_context": group_context,
+        "user_message_history": user_message_history,
+        "current_time": current_time.isoformat(),  # Pass as ISO string
     })
 
 
@@ -78,12 +85,23 @@ async def flag(
     """
     This function is used to flag sensitive contents
     """
+    current_time_arg = args.get("current_time")
+    if current_time_arg:
+        # Ensure it's timezone-aware if it's coming as a string
+        parsed_time = datetime.fromisoformat(current_time_arg)
+        if parsed_time.tzinfo is None:
+            parsed_time = parsed_time.replace(tzinfo=timezone.utc)  # Assume UTC if no tz info
+    else:
+        parsed_time = datetime.now(timezone.utc)
+
     ctx = FlagContext(
         llm=create_chat_client(MAIN_MODEL),
         message=args.get("message"),
         first_name=args.get("first_name"),
         group_title=args.get("group_title"),
         group_context=args.get("group_context"),
+        user_message_history=args.get("user_message_history", []),
+        current_time=parsed_time
     )
 
     flag_response: FlagResponse = await initial_flag_content(ctx)
@@ -100,6 +118,16 @@ async def initial_flag_content(ctx: FlagContext) -> FlagResponse:
     """
     This function is used to flag sensitive contents
     """
+    history_str_parts = []
+    for msg_data in ctx.user_message_history:
+        part = f"- At {msg_data['created_at']}: \"{msg_data['text']}\""
+        if msg_data.get('replied_to_text') and msg_data['replied_to_text'] is not None:  # Check for None
+            part += f" (in reply to: \"{msg_data['replied_to_text']}\")"
+        history_str_parts.append(part)
+
+    user_message_history_str = "\n".join(
+        history_str_parts) if history_str_parts else "No recent message history available for this user in this group."
+
     result = await ctx.llm.with_structured_output(
         schema=FlagResponse,
         strict=True
@@ -109,6 +137,8 @@ async def initial_flag_content(ctx: FlagContext) -> FlagResponse:
             INPUT=ctx.message,
             GROUP_TITLE=ctx.group_title,
             GROUP_CONTEXT=ctx.group_context,
+            USER_MESSAGE_HISTORY=user_message_history_str,
+            CURRENT_TIME=ctx.current_time.isoformat()  # Ensure current_time is also passed
         )
     )
 
@@ -120,6 +150,9 @@ async def judgement(ctx: FlagContext, flag_response: FlagResponse) -> JudgmentRe
     """
     This function is used to flag sensitive contents
     """
+    # The judgement prompt does not currently use user_message_history or current_time directly,
+    # but they are available in ctx if needed in the future.
+    # WardenAI's analysis (which might be influenced by history) is passed.
     result = await ctx.llm.with_structured_output(
         schema=JudgmentResponse,
         strict=True

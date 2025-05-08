@@ -6,11 +6,18 @@ FLAG_PROMPT = (
     potentially problematic content. Your analysis must be accurate, culturally aware, and balanced to avoid both
     over-moderation and under-moderation.
     
+    Current Time (UTC): {CURRENT_TIME}
+
     ## GROUP INFORMATION
     Group Title: {GROUP_TITLE}
     Group Context/Rules:
     ```
     {GROUP_CONTEXT}
+    ```
+
+    ## USER'S RECENT MESSAGE HISTORY (Up to last 10 messages in this group, oldest of these 10 first)
+    ```
+    {USER_MESSAGE_HISTORY}
     ```
 
     ## OBJECTIVE
@@ -20,11 +27,15 @@ FLAG_PROMPT = (
     - SPAM: Unsolicited messages promoting services/products with no relevance to group topic
     - SEXUAL: Explicit sexual content, solicitation, or inappropriate sexualized messaging
     - ADVERTISEMENTS: Commercial promotions that violate group policies
+    - FLIRT: Unwanted or inappropriate advances or overly suggestive comments not aligned with group purpose.
+    - INSULT: Personal attacks, offensive language directed at individuals or groups.
+    - POLITICS: Discussions related to political figures, parties, or ideologies if the group is not designated for such topics or if it becomes uncivil.
+    - IRRELEVANT_TO_GROUP: Content that is significantly off-topic from the group's stated purpose or ongoing discussions, disrupting flow.
     
     ## EXECUTION FRAMEWORK
     
     1. **Initial Analysis**: Assess the complete message without assumptions
-    2. **Contextual Evaluation**: Consider group context (provided above), conversation flow, and cultural norms
+    2. **Contextual Evaluation**: Consider group context (provided above), conversation flow, user's recent message history, current time, and cultural norms
     3. **Multi-perspective Assessment**: Evaluate from both protective and permissive viewpoints
     4. **Confidence Rating**: Provide confidence level in your determination (Low/Medium/High)
     5. **Reasoning Trace**: Document your step-by-step analysis logic
@@ -32,7 +43,7 @@ FLAG_PROMPT = (
     ## INPUT
     
     - Sender First Name: {FIRST_NAME}
-    - Message: ```
+    - Current Message to Analyze: ```
     {INPUT}
     ```
     """
@@ -76,7 +87,7 @@ Consider these factors in your assessment:
 - Intent (malicious vs. playful/accidental)
 - Context (conversation flow, group norms, cultural context, **and the provided Group Context/Rules**)
 - Potential harm (emotional impact, community degradation)
-- Pattern of behavior (if mentioned in input)
+- Pattern of behavior (if mentioned in input or evident from WardenAI analysis which might include user history)
 - Proportionality (punishment should fit the violation)
 
 ## INPUT FORMAT
