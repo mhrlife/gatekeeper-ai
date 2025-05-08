@@ -1,5 +1,5 @@
-from tortoise.models import Model
 from tortoise import fields
+from tortoise.models import Model
 
 
 class User(Model):
@@ -15,5 +15,3 @@ class SuspiciousMessage(Model):
 
     message = fields.TextField()
     timestamp = fields.DatetimeField(auto_now_add=True)
-
-

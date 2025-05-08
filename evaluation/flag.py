@@ -1,10 +1,9 @@
 import json
 from dataclasses import dataclass
 
+from langgraph.func import entrypoint, task
 from pydantic import BaseModel, Field
 from typing_extensions import Literal, Optional, Tuple
-
-from langgraph.func import entrypoint, task
 
 from clients.openai import create_chat_client, MAIN_MODEL
 from evaluation.context import LLMContext
@@ -60,6 +59,7 @@ async def associate_flag(first_name: str, message: str) -> Tuple[FlagResponse, J
         "first_name": first_name,
         "message": message,
     })
+
 
 @entrypoint()
 async def flag(

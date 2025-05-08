@@ -1,4 +1,4 @@
-from typing import Callable, Any
+from typing import Any
 
 from structlog import get_logger
 from typing_extensions import Callable

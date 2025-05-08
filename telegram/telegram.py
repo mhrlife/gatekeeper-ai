@@ -1,11 +1,10 @@
-import json
 import os
 
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 from structlog import get_logger
 
-from evaluation.flag import flag, associate_flag
+from evaluation.flag import associate_flag
 
 logger = get_logger()
 

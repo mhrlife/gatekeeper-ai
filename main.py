@@ -1,5 +1,4 @@
 import asyncio
-import os
 
 from dotenv import load_dotenv
 from structlog import get_logger
