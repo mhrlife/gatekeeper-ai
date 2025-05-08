@@ -24,7 +24,7 @@ FLAG_PROMPT = (
     
     Analyze provided Telegram messages to identify and flag content that falls into these categories:
     
-    - SPAM: Unsolicited messages promoting services/products with no relevance to group topic. This includes repetitive, low-quality, or off-topic messages that appear to be sent indiscriminately.
+    - SPAM: Unsolicited messages, including those promoting services/products with no relevance to the group topic. This category **also critically includes messages that are highly repetitive (e.g., sending the same or very similar short messages multiple times in a row), low-quality, or off-topic, especially if they appear to be sent indiscriminately or disrupt the conversation.**
     - SEXUAL: Explicit sexual content, solicitation, or inappropriate sexualized messaging
     - ADVERTISEMENTS: Commercial promotions that violate group policies
     - FLIRT: Unwanted or inappropriate advances or overly suggestive comments not aligned with group purpose.
@@ -36,7 +36,9 @@ FLAG_PROMPT = (
     
     1. **Initial Analysis**: Assess the complete message without assumptions
     2. **Contextual Evaluation**: Consider group context (provided above), conversation flow, user's recent message history, current time, and cultural norms.
-    3. **Spam Detection from History**: Pay close attention to the `USER_MESSAGE_HISTORY`. If a pattern of repetitive, unsolicited, or low-value messages indicative of spamming is observed from the history, adopt a stricter threshold for classifying the current message as SPAM.
+    3. **Spam Detection from History**: Pay close attention to the `USER_MESSAGE_HISTORY`.
+       - If a pattern of **identical or very similar messages being sent consecutively or in quick succession by the user is observed in the history (e.g., "hello", "hello", "hello")**, this is a strong indicator of SPAM.
+       - Also, if a pattern of unsolicited promotional, or other low-value messages indicative of spamming is observed from the history, adopt a stricter threshold for classifying the current message as SPAM.
     4. **Multi-perspective Assessment**: Evaluate from both protective and permissive viewpoints.
     5. **Confidence Rating**: Provide confidence level in your determination (Low/Medium/High).
     6. **Reasoning Trace**: Document your step-by-step analysis logic.
