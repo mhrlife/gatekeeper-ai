@@ -66,11 +66,9 @@ class JudgmentResponse(BaseModel):
     message_to_user: Optional[str] = Field(
         default=None,
         description=(
-            "Suggested message to send to the user explaining the action (if applicable).  max length 40 characters\n"
-            "MUST BE IN THE SAME LANGUAGE AS THE INPUT MESSAGE\n"
-            "give them also feedback how they can stay in the groups rules\n"
-            "You Must always give them a feedback how they can stay in the groups rules\n"
-        ),
+            """
+            A short, concise message to send to the user, explaining the action taken. must be in Persian, one sentence, very short.
+            """),
     )
 
 

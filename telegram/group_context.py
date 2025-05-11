@@ -206,4 +206,5 @@ async def process_forward_message(
     await message.answer(
         f"Group {group.name} ({group_id}) has been added successfully."
     )
+    
     await state.clear()

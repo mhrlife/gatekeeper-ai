@@ -83,9 +83,7 @@ async def process_flag_message(message: Message, group: GroupInfo, messages_hist
         await message.delete()
         await message.bot.send_message(
             chat_id=message.chat.id,
-            text=f"""{message.from_user.first_name} - پیام سیستم:
-
-{action.message_to_user}"""
+            text=f"""{message.from_user.first_name}: {action.message_to_user}"""
         )
 
 
