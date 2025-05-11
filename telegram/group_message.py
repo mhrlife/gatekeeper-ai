@@ -17,12 +17,14 @@ is_group_chat = F.chat.func(lambda chat: chat.id < 0)
 
 @dispatcher.message(is_group_chat & F.text == "warden:gp_id")
 async def get_group_id(message: Message) -> None:
-    await message.bot.send_message(
+    bot_message = await message.bot.send_message(
         chat_id=message.from_user.id,
         text=f"Your group ID is: {message.chat.id}",
     )
 
     await message.delete()
+    await asyncio.sleep(30)
+    await bot_message.delete()
 
 
 @dispatcher.message(is_group_chat)
@@ -81,10 +83,12 @@ async def process_flag_message(message: Message, group: GroupInfo, messages_hist
             return
 
         await message.delete()
-        await message.bot.send_message(
+        bot_message = await message.bot.send_message(
             chat_id=message.chat.id,
             text=f"""{message.from_user.first_name}: {action.message_to_user}"""
         )
+        await asyncio.sleep(30)
+        await bot_message.delete()
 
 
 async def log_current_chat_in_history(message: Message):
